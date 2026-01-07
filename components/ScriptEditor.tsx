@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PipelineConfig, ScriptType } from '../types';
 import { SCRIPTS } from '../constants';
-import { Download, Copy, Check, RefreshCw } from 'lucide-react';
+import { Download, Copy, Check, RefreshCw, FileUp, FileDown, Trash2 } from 'lucide-react';
 
 interface ScriptEditorProps {
   config: PipelineConfig;
@@ -12,6 +12,7 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
   const [activeScript, setActiveScript] = useState<ScriptType>(ScriptType.MAIN);
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Hydrate template
   useEffect(() => {
@@ -56,6 +57,74 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  const handleDownloadTemplate = () => {
+    const csvContent = "project_name,species_name\nPRJNA327257,Solanum_lycopersicum\nPRJNA495025,Solanum_virginianum";
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'project_template.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (!text) return;
+
+      try {
+        const lines = text.split(/\r\n|\n/);
+        const newProjects: { name: string; species: string }[] = [];
+        const newSpeciesSet = new Set<string>(config.speciesList);
+
+        lines.forEach((line, index) => {
+          // Skip empty lines
+          if (!line.trim()) return;
+          
+          const parts = line.split(',');
+          if (parts.length >= 2) {
+            const name = parts[0].trim();
+            const species = parts[1].trim();
+            
+            // Skip header row if present
+            if (index === 0 && (name.toLowerCase() === 'project_name' || name.toLowerCase() === 'project')) return;
+
+            if (name && species) {
+              newProjects.push({ name, species });
+              newSpeciesSet.add(species);
+            }
+          }
+        });
+
+        if (newProjects.length > 0) {
+          setConfig(prev => ({
+            ...prev,
+            projects: newProjects,
+            speciesList: Array.from(newSpeciesSet)
+          }));
+          alert(`成功导入 ${newProjects.length} 个项目！`);
+        } else {
+          alert('未能识别有效数据，请检查 CSV 格式。');
+        }
+      } catch (err) {
+        alert('文件解析失败，请确保上传的是标准的 CSV 文件。');
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const TABS = [
@@ -105,36 +174,78 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
           </div>
 
           <div className="pt-4 border-t border-slate-100">
-            <h3 className="font-semibold text-slate-700 mb-2">项目与物种</h3>
-            {config.projects.map((proj, idx) => (
-              <div key={idx} className="flex gap-2 mb-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-slate-700">项目与物种</h3>
+              <div className="flex gap-2">
+                 <button 
+                  onClick={handleDownloadTemplate}
+                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title="下载 CSV 模板"
+                >
+                  <FileDown size={16} />
+                </button>
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title="上传 CSV (Excel 另存为 CSV)"
+                >
+                  <FileUp size={16} />
+                </button>
                 <input 
-                  value={proj.name}
-                  onChange={(e) => {
-                    const newProjs = [...config.projects];
-                    newProjs[idx].name = e.target.value;
-                    setConfig({...config, projects: newProjs});
-                  }}
-                  className="w-1/2 p-1 text-xs border rounded bg-slate-50"
-                  placeholder="项目 ID"
-                />
-                <input 
-                  value={proj.species}
-                  onChange={(e) => {
-                    const newProjs = [...config.projects];
-                    newProjs[idx].species = e.target.value;
-                    setConfig({...config, projects: newProjs});
-                  }}
-                  className="w-1/2 p-1 text-xs border rounded bg-slate-50"
-                  placeholder="物种名称"
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept=".csv,.txt" 
+                  onChange={handleFileUpload}
                 />
               </div>
-            ))}
+            </div>
+            
+            <div className="text-xs text-slate-400 mb-3">
+              支持 Excel 另存为 CSV 格式导入 (格式: 项目名,物种名)
+            </div>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+              {config.projects.map((proj, idx) => (
+                <div key={idx} className="flex gap-2 group">
+                  <input 
+                    value={proj.name}
+                    onChange={(e) => {
+                      const newProjs = [...config.projects];
+                      newProjs[idx].name = e.target.value;
+                      setConfig({...config, projects: newProjs});
+                    }}
+                    className="w-[45%] p-1.5 text-xs border border-slate-200 rounded bg-slate-50 focus:bg-white focus:border-blue-400 outline-none"
+                    placeholder="项目 ID"
+                  />
+                  <input 
+                    value={proj.species}
+                    onChange={(e) => {
+                      const newProjs = [...config.projects];
+                      newProjs[idx].species = e.target.value;
+                      setConfig({...config, projects: newProjs});
+                    }}
+                    className="w-[45%] p-1.5 text-xs border border-slate-200 rounded bg-slate-50 focus:bg-white focus:border-blue-400 outline-none"
+                    placeholder="物种名称"
+                  />
+                  <button 
+                    onClick={() => {
+                        const newProjs = config.projects.filter((_, i) => i !== idx);
+                        setConfig({...config, projects: newProjs});
+                    }}
+                    className="w-[10%] flex items-center justify-center text-slate-300 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            
             <button 
               onClick={() => setConfig({...config, projects: [...config.projects, {name: 'New_Project', species: 'Species_Name'}]})}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+              className="mt-3 w-full py-2 text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 font-medium transition-colors"
             >
-              + 添加项目
+              + 添加单条记录
             </button>
           </div>
         </div>
