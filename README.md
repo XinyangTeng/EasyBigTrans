@@ -1,6 +1,2 @@
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+点击链接https://xinyangteng.github.io/EasyBigTrans
+用脚本生成器下载转录组分析脚本，在本地运行![Uploading image.png…]()
