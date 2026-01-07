@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Book, FileText } from 'lucide-react';
+import { Book } from 'lucide-react';
 import { PipelineConfig } from '../types';
 import { GUIDE_CONTENT } from '../constants';
 
@@ -7,7 +7,7 @@ interface ChatAssistantProps {
     config: PipelineConfig;
 }
 
-const ChatAssistant: React.FC<ChatAssistantProps> = ({ config }) => {
+const GuideViewer: React.FC<ChatAssistantProps> = ({ config }) => {
     const [content, setContent] = useState('');
 
     useEffect(() => {
@@ -23,8 +23,8 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ config }) => {
             <div className="bg-slate-800 p-4 text-white flex items-center gap-3">
                 <Book size={24} className="text-blue-400" />
                 <div>
-                    <h2 className="font-semibold">流程指南</h2>
-                    <p className="text-xs text-slate-400">实施方案参考手册</p>
+                    <h2 className="font-semibold">流程说明文档</h2>
+                    <p className="text-xs text-slate-400">RNA-seq 批量分析标准操作流程</p>
                 </div>
             </div>
 
@@ -51,4 +51,4 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ config }) => {
     );
 };
 
-export default ChatAssistant;
+export default GuideViewer;

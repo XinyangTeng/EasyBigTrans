@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PipelineConfig, ScriptType } from '../types';
 import { SCRIPTS } from '../constants';
-import { Download, Copy, Check, RefreshCw, FileText } from 'lucide-react';
-import { generateReadme } from '../services/gemini.ts';
+import { Download, Copy, Check, RefreshCw } from 'lucide-react';
 
 interface ScriptEditorProps {
   config: PipelineConfig;
@@ -13,7 +12,6 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
   const [activeScript, setActiveScript] = useState<ScriptType>(ScriptType.MAIN);
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
-  const [generatedReadme, setGeneratedReadme] = useState('');
 
   // Hydrate template
   useEffect(() => {
@@ -45,8 +43,7 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
   const handleDownload = () => {
     const element = document.createElement("a");
     const file = new Blob([generatedCode], {type: 'text/plain'});
-    const filename = activeScript === 'readme' as any ? 'README.md' : 
-                     activeScript === ScriptType.MAIN ? 'main_pipeline.sh' :
+    const filename = activeScript === ScriptType.MAIN ? 'main_pipeline.sh' :
                      activeScript === ScriptType.UNZIP ? 'batch_unzip_sra.sh' :
                      activeScript === ScriptType.INDEX ? 'batch_build_index.sh' :
                      activeScript === ScriptType.ALIGN ? 'batch_align.sh' :
@@ -58,12 +55,6 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
     element.download = filename;
     document.body.appendChild(element);
     element.click();
-  };
-
-  const handleGenerateReadme = async () => {
-    const text = await generateReadme(config);
-    setGeneratedReadme(text);
-    setActiveScript('readme' as any); 
   };
 
   const TABS = [
@@ -145,15 +136,6 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
               + 添加项目
             </button>
           </div>
-          
-          <div className="pt-6">
-             <button 
-                onClick={handleGenerateReadme}
-                className="w-full py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-medium flex items-center justify-center gap-2 transition-colors"
-             >
-               <FileText size={16} /> 生成说明文档 (README)
-             </button>
-          </div>
         </div>
       </div>
 
@@ -163,9 +145,9 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
            {TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => { setActiveScript(tab.id); setGeneratedReadme(''); }}
+                onClick={() => { setActiveScript(tab.id); }}
                 className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                  activeScript === tab.id && !generatedReadme
+                  activeScript === tab.id
                     ? 'bg-blue-600 text-white' 
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
@@ -173,9 +155,6 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
                 {tab.label}
               </button>
             ))}
-             {generatedReadme && (
-                <button className="px-3 py-1 rounded text-xs font-medium bg-indigo-600 text-white">README.md</button>
-             )}
             <div className="ml-auto flex gap-2">
                 <button onClick={handleCopy} className="p-2 text-slate-400 hover:text-white transition-colors" title="复制">
                 {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
@@ -188,7 +167,7 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
         
         <div className="flex-1 overflow-auto p-4 font-mono text-sm">
           <pre className="text-slate-300 leading-relaxed whitespace-pre-wrap">
-            {generatedReadme || generatedCode}
+            {generatedCode}
           </pre>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { DEFAULT_CONFIG } from './constants';
 import { PipelineConfig } from './types';
 import ScriptEditor from './components/ScriptEditor';
 import Dashboard from './components/Dashboard';
-import ChatAssistant from './components/ChatAssistant';
+import GuideViewer from './components/ChatAssistant';
 
 const AppContent: React.FC = () => {
   const [config, setConfig] = useState<PipelineConfig>(DEFAULT_CONFIG);
@@ -43,13 +43,13 @@ const AppContent: React.FC = () => {
         <nav className="flex-1 p-4 space-y-2">
           <NavItem to="/" icon={LayoutDashboard} label="仪表盘 (演示)" />
           <NavItem to="/scripts" icon={Code} label="脚本生成器" />
-          <NavItem to="/guide" icon={BookOpen} label="流程指南" />
+          <NavItem to="/guide" icon={BookOpen} label="流程说明" />
         </nav>
 
         <div className="p-6 border-t border-slate-800">
            <div className="flex flex-col gap-2">
              <div className="flex items-center gap-2 text-xs text-slate-500">
-               <span>v1.0.0 (Web版)</span>
+               <span>v1.0.1 (Lite版)</span>
              </div>
              <a href="#" className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors">
                <Github size={12} />
@@ -68,11 +68,11 @@ const AppContent: React.FC = () => {
           </div>
           <h1 className="text-lg font-semibold text-slate-800 hidden md:block">
             {location.pathname === '/scripts' ? '批量脚本生成' : 
-             location.pathname === '/guide' ? '流程参考手册' : '流程概览'}
+             location.pathname === '/guide' ? '流程操作指南' : '流程概览'}
           </h1>
           <div className="flex items-center gap-3">
-             <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium border border-blue-200">
-               Web 在线生成器
+             <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium border border-green-200">
+               本地生成模式
              </span>
           </div>
         </header>
@@ -81,7 +81,7 @@ const AppContent: React.FC = () => {
           <Routes>
             <Route path="/" element={<Dashboard config={config} />} />
             <Route path="/scripts" element={<ScriptEditor config={config} setConfig={setConfig} />} />
-            <Route path="/guide" element={<ChatAssistant config={config} />} />
+            <Route path="/guide" element={<GuideViewer config={config} />} />
           </Routes>
         </div>
       </main>
