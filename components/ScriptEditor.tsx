@@ -55,6 +55,7 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ config, setConfig }) => {
     element.download = filename;
     document.body.appendChild(element);
     element.click();
+    document.body.removeChild(element);
   };
 
   const TABS = [
