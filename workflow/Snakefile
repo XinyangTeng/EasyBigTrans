@@ -1,0 +1,20 @@
+"""
+EasyBigTrans: a Snakemake workflow for batch RNA-seq analysis
+of plant and non-model species from public SRA data.
+"""
+
+configfile: "config/config.yaml"
+
+include: "rules/common.smk"
+include: "rules/fastq.smk"
+include: "rules/qc.smk"
+include: "rules/index.smk"
+include: "rules/align.smk"
+include: "rules/quantify.smk"
+include: "rules/annotate.smk"
+include: "rules/report.smk"
+
+
+rule all:
+    input:
+        get_all_targets(),

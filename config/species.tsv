@@ -1,0 +1,3 @@
+species	genome_fa	genome_gtf	index_dir
+Solanum_lycopersicum	/genomes/Solanum_lycopersicum/genome.fa	/genomes/Solanum_lycopersicum/genes.gtf	/genomes/Solanum_lycopersicum/hisat2_index
+Solanum_virginianum	/genomes/Solanum_virginianum/genome.fa	/genomes/Solanum_virginianum/genes.gff	/genomes/Solanum_virginianum/hisat2_index

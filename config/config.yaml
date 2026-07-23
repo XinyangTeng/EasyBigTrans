@@ -1,0 +1,30 @@
+# EasyBigTrans main configuration
+# Edit paths and parameters below, then point projects.tsv / species.tsv
+# to your data.
+
+# Where intermediate and final results will be written.
+workdir: "results"
+
+# Input tables (TSV, tab-separated).
+projects: "config/projects.tsv"
+species:  "config/species.tsv"
+
+# Per-rule thread counts. Tune to your machine.
+threads:
+  fasterq_dump:   4
+  fastp:          8
+  hisat2_build:   16
+  hisat2_align:   10
+  samtools:       8
+  featurecounts:  10
+  eggnog:         16
+
+# fastp adapter/quality trimming options.
+fastp_extra: "--detect_adapter_for_pe --qualified_quality_phred 20 --length_required 36"
+
+# Optional eggNOG functional annotation (off by default; turn on with --config run_eggnog=true).
+run_eggnog: false
+eggnog_db: "/path/to/eggnog_db"   # required if run_eggnog=true
+
+# Keep intermediate fastq after trimming. Turn off to save disk.
+keep_trimmed_fastq: true

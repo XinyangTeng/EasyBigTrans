@@ -1,0 +1,3 @@
+project	species	sra_dir	layout
+PRJNA327257	Solanum_lycopersicum	/data/PRJNA327257/SRA	paired
+PRJNA495025	Solanum_virginianum	/data/PRJNA495025/SRA	paired
